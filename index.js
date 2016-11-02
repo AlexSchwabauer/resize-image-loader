@@ -19,38 +19,38 @@ var loaderUtils = require('loader-utils');
 //added to support cross-platform compatibility
 var path = require('path');
 
-var defaultSizes = ['320w','960w','2048w'];
+var defaultSizes = ['320w', '960w', '2048w'];
 var defaultBlur = 40;
 var defaultPlaceholderSize = 20;
 
-var queue = (function(q, c){
+var queue = (function (q, c) {
   var max = 10;
-  var push = function(fnc){
-      q.push(fnc);
-      canDo();
-    },
-    canDo = function(){
-      if(c < max && q.length > 0){
+  var push = function (fnc) {
+    q.push(fnc);
+    canDo();
+  },
+    canDo = function () {
+      if (c < max && q.length > 0) {
         debug(q.length + " images remaining.");
         c++;
         q.shift()(next);
       }
     },
-    next = function(){
-      setTimeout(function(){
+    next = function () {
+      setTimeout(function () {
         c--;
         canDo();
-      },0);
+      }, 0);
     };
-    return {push:push, next:next};
-}([], 0));
+  return { push: push, next: next };
+} ([], 0));
 
-function createPlaceholder(content, placeholder, ext, blur, files){
-  return function(next){
+function createPlaceholder(content, placeholder, ext, blur, files) {
+  return function (next) {
 
-    var getSize = function(){
+    var getSize = function () {
       gm(content)
-        .size(function(err, _size){
+        .size(function (err, _size) {
           if (err) {
             return;
           }
@@ -59,22 +59,22 @@ function createPlaceholder(content, placeholder, ext, blur, files){
             return;
           }
           setPlaceholder(_size);
-      });
+        });
     };
 
-    var setPlaceholder = function(size){
+    var setPlaceholder = function (size) {
       gm(content)
         .resize(placeholder)
-        .toBuffer(ext, function(err, buf){
+        .toBuffer(ext, function (err, buf) {
           if (!buf) return;
           debug("placeholder: " + JSON.stringify(size));
-          var uri = new Datauri().format('.'+ext, buf).content;
-          var blur =  "<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 " + size.width + " " + size.height + "'>" +
-                        "<defs><filter id='puppybits'><feGaussianBlur in='SourceGraphic' stdDeviation='" + defaultBlur + "'/></filter></defs>" +
-                        "<image width='100%' height='100%' xmlns:xlink='http://www.w3.org/1999/xlink' xlink:href='" + uri + "' filter='url(#puppybits)'></image>" +
-                      "</svg>";
+          var uri = new Datauri().format('.' + ext, buf).content;
+          var blur = "<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 " + size.width + " " + size.height + "'>" +
+            "<defs><filter id='puppybits'><feGaussianBlur in='SourceGraphic' stdDeviation='" + defaultBlur + "'/></filter></defs>" +
+            "<image width='100%' height='100%' xmlns:xlink='http://www.w3.org/1999/xlink' xlink:href='" + uri + "' filter='url(#puppybits)'></image>" +
+            "</svg>";
           var micro = new Datauri().format('.svg', new Buffer(blur, 'utf8')).content;
-          var response = {size:size, placeholder:micro};
+          var response = { size: size, placeholder: micro };
           next(response);
         });
     };
@@ -83,18 +83,18 @@ function createPlaceholder(content, placeholder, ext, blur, files){
   };
 }
 
-function createResponsiveImages(content, sizes, ext, files, emitFile){
-  return function(next){
+function createResponsiveImages(content, sizes, ext, files, emitFile) {
+  return function (next) {
     var count = 0;
     var images = [];
-    var imgset = files.map(function(file, i){ return file + ' ' + sizes[i] + ' '; }).join(',');
+    var imgset = files.map(function (file, i) { return '/' + file + ' ' + sizes[i] + ' '; }).join(',');
 
-    sizes.map(function(size, i){
+    sizes.map(function (size, i) {
       size = parseInt(size);
       gm(content)
         .resize(size)
-        .toBuffer(ext, function(err, buf){
-          if (buf){
+        .toBuffer(ext, function (err, buf) {
+          if (buf) {
             debug('srcset: ' + imgset);
             images[i] = buf;
             emitFile(files[i], buf);
@@ -103,15 +103,15 @@ function createResponsiveImages(content, sizes, ext, files, emitFile){
 
           count++;
           if (count >= files.length) {
-            var response = {srcset:imgset};
+            var response = { srcset: imgset };
             next(response);
           }
-      });
+        });
     });
   };
 }
 
-module.exports = function(content) {
+module.exports = function (content) {
   var idx = this.loaderIndex;
 
   // ignore content from previous loader because it could be datauri
@@ -124,7 +124,7 @@ module.exports = function(content) {
   query.sizes = (query.sizes && !Array.isArray(query.sizes) && [query.sizes]) || query.sizes || size;
 
   var callback = this.async();
-  if(!this.emitFile) throw new Error("emitFile is required from module system");
+  if (!this.emitFile) throw new Error("emitFile is required from module system");
   this.cacheable && this.cacheable();
   this.addDependency(this.resourcePath);
 
@@ -132,16 +132,16 @@ module.exports = function(content) {
     // Bypass processing while on watch mode
     return callback(null, content);
   } else {
-    
+
     //modified to fix a bug on windows, where the file variable is populated with the entire absolute path
     var parsedPath = path.parse(this.resourcePath);
     var file = parsedPath.base;
     var name = parsedPath.name;
     var ext = parsedPath.ext.slice(1);
-    
-    
-    var sizes = query.sizes.map(function(s){ return s; });
-    var files = sizes.map(function(size, i){ return '/' + name + '-' + size + '.' + ext; });
+
+
+    var sizes = query.sizes.map(function (s) { return s; });
+    var files = sizes.map(function (size, i) { return name + '-' + size + '.' + ext; });
     var emitFile = this.emitFile;
 
     var task1 = null,
@@ -153,7 +153,7 @@ module.exports = function(content) {
       task1 = createPlaceholder(content, query.placeholder, ext, query.blur, files);
     }
 
-    if (sizes.length >= 1){
+    if (sizes.length >= 1) {
       if (!task1) {
         task1 = createResponsiveImages(content, sizes, ext, files, emitFile);
       } else {
@@ -161,16 +161,16 @@ module.exports = function(content) {
       }
     }
 
-    queue.push((function(t1, t2, callback){
-      return function(next){
-        if (t2){
-          t2(function(result){
-            t1(function(result2){
-              Object.keys(result2).map(function(key){
+    queue.push((function (t1, t2, callback) {
+      return function (next) {
+        if (t2) {
+          t2(function (result) {
+            t1(function (result2) {
+              Object.keys(result2).map(function (key) {
                 result[key] = result2[key];
               });
               debug(JSON.stringify(result, undefined, 1));
-              callback(null, "module.exports = '"+JSON.stringify(result)+"'");
+              callback(null, "module.exports = '" + JSON.stringify(result) + "'");
               next();
             });
           });
@@ -178,14 +178,15 @@ module.exports = function(content) {
         }
 
 
-        t1(function(result){
+        t1(function (result) {
           debug(JSON.stringify(result, undefined, 1));
-          callback(null, "module.exports = '"+JSON.stringify(result)+"'");
+          callback(null, "module.exports = '" + JSON.stringify(result) + "'");
           next();
         });
       };
-    }(task1, task2, callback)));
+    } (task1, task2, callback)));
   }
 };
 
 module.exports.raw = true; // get buffer stream instead of utf8 string
+
