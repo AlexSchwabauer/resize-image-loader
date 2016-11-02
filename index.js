@@ -103,7 +103,7 @@ function createResponsiveImages(content, sizes, ext, files, emitFile) {
 
           count++;
           if (count >= files.length) {
-            var response = { srcset: imgset };
+            var response = { srcset: imgset, sizes: sizes };
             next(response);
           }
         });
