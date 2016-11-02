@@ -141,7 +141,7 @@ module.exports = function(content) {
     
     
     var sizes = query.sizes.map(function(s){ return s; });
-    var files = sizes.map(function(size, i){ return name + '-' + size + '.' + ext; });
+    var files = sizes.map(function(size, i){ return '/' + name + '-' + size + '.' + ext; });
     var emitFile = this.emitFile;
 
     var task1 = null,
