@@ -21,7 +21,8 @@
     "datauri": "^0.7.1",
     "debug": "^2.2.0",
     "file-loader": "^0.8.4",
-    "loader-utils": "^0.2.6"
+    "loader-utils": "^0.2.6",
+   "queue": "^4.0.0"
   },
   "peerDependencies": {
     "gm": "*",
