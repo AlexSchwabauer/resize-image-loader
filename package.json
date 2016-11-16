@@ -1,6 +1,6 @@
 {
   "name": "resize-image-loader",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Responsive image loader for webpack",
   "author": "Alex Schwabauer @sirfrontend",
   "keywords": "webpack image resize responsive adaptive",
