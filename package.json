@@ -2,7 +2,7 @@
   "name": "resize-image-loader",
   "version": "0.4.0",
   "description": "Responsive image loader for webpack",
-  "author": "Puppybits @puppybits",
+  "author": "Alex Schwabauer @sirfrontend",
   "keywords": "webpack image resize responsive adaptive",
   "scripts": {
     "test": "DEBUG=resize-image-loader webpack --config test/webpack.config.js"
@@ -18,11 +18,9 @@
     "url": "git@github.com:LevelMoney/resize-image-loader.git"
   },
   "dependencies": {
-    "datauri": "^0.7.1",
-    "debug": "^2.2.0",
-    "file-loader": "^0.8.4",
+    "image-size": "^0.5.0",
     "loader-utils": "^0.2.6",
-   "queue": "^4.0.0"
+    "queue": "^4.0.0"
   },
   "peerDependencies": {
     "gm": "*",
